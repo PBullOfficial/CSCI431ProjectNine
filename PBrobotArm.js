@@ -35,9 +35,11 @@ var vertexColors = [
 
 var BASE_HEIGHT      = 2.0;
 var BASE_WIDTH       = 5.0;
-var LOWER_ARM_HEIGHT = 5.0;
+var LOWER_ARM_HEIGHT = 2.5;
 var LOWER_ARM_WIDTH  = 0.5;
-var UPPER_ARM_HEIGHT = 5.0;
+var MIDDLE_ARM_HEIGHT = 2.5;
+var MIDDLE_ARM_WIDTH  = 0.5;
+var UPPER_ARM_HEIGHT = 2.5;
 var UPPER_ARM_WIDTH  = 0.5;
 
 // Shader transformation matrices
@@ -48,10 +50,11 @@ var modelViewMatrix, projectionMatrix;
 
 var Base = 0;
 var LowerArm = 1;
-var UpperArm = 2;
+var MiddleArm = 2;
+var UpperArm = 3;
 
 
-var theta= [ 0, 0, 0];
+var theta= [ 0, 0, 0, 0];
 
 var angle = 0;
 
@@ -140,8 +143,13 @@ window.onload = function init() {
     document.getElementById("slider2").onchange = function(event) {
          theta[1] = event.target.value;
     };
+
     document.getElementById("slider3").onchange = function(event) {
          theta[2] =  event.target.value;
+    };
+
+    document.getElementById("slider4").onchange = function(event) {
+         theta[3] =  event.target.value;
     };
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
@@ -196,6 +204,21 @@ function upperArm() {
 //----------------------------------------------------------------------------
 
 
+function middleArm()
+{
+    var s = scale(MIDDLE_ARM_WIDTH, MIDDLE_ARM_HEIGHT, MIDDLE_ARM_WIDTH);
+    var instanceMatrix = mult( translate( 0.0, 0.5 * MIDDLE_ARM_HEIGHT, 0.0 ), s);
+
+
+    var t = mult(modelViewMatrix, instanceMatrix);
+    gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(t)   );
+    gl.drawArrays( gl.TRIANGLES, 0, NumVertices );
+
+}
+
+//----------------------------------------------------------------------------
+
+
 function lowerArm()
 {
     var s = scale(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH);
@@ -224,8 +247,13 @@ var render = function() {
     printm( translate(0.0, BASE_HEIGHT, 0.0));
     printm(modelViewMatrix);
 
-    modelViewMatrix  = mult(modelViewMatrix, translate(0.0, LOWER_ARM_HEIGHT, 0.0));
+    modelViewMatrix  = mult(modelViewMatrix, translate(0.0, MIDDLE_ARM_HEIGHT, 0.0));
     modelViewMatrix  = mult(modelViewMatrix, rotate(theta[UpperArm], vec3(0, 0, 1)) );
+
+    middleArm();
+
+    modelViewMatrix  = mult(modelViewMatrix, translate(0.0, LOWER_ARM_HEIGHT, 0.0));
+    modelViewMatrix  = mult(modelViewMatrix, rotate(theta[MiddleArm], vec3(0, 0, 1)) );
 
     upperArm();
 
